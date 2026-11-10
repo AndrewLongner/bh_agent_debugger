@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)..\Temp\bh_profile_analyzer_obj\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>

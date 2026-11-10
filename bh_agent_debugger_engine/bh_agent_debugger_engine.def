@@ -1,0 +1,4 @@
+LIBRARY "bh_agent_debugger_engine.dll"
+EXPORTS
+    DllCanUnloadNow      PRIVATE
+    DllGetClassObject    PRIVATE

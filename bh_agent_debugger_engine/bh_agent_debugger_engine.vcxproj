@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{79BE15AB-E552-46D5-B7FD-56B1E3E9523A}</ProjectGuid>
+    <RootNamespace>bhagentdebuggerengine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)Temp\$(ProjectName)_$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Temp\int\$(ProjectName)_$(PlatformName)_$(Configuration)\</IntDir>
+    <IncludePath>$(VSInstallDir)DIA SDK\include;$(VSInstallDir)VSSDK\VisualStudioIntegration\Common\Inc;$(SolutionDir)packages\Microsoft.VSSDK.Debugger.VSDebugEng.17.14.1051801\build\native\inc;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)Temp\$(ProjectName)_$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Temp\int\$(ProjectName)_$(PlatformName)_$(Configuration)\</IntDir>
+    <IncludePath>$(VSInstallDir)DIA SDK\include;$(VSInstallDir)VSSDK\VisualStudioIntegration\Common\Inc;$(SolutionDir)packages\Microsoft.VSSDK.Debugger.VSDebugEng.17.14.1051801\build\native\inc;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)Temp\$(ProjectName)_$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Temp\int\$(ProjectName)_$(PlatformName)_$(Configuration)\</IntDir>
+    <IncludePath>$(VSInstallDir)DIA SDK\include;$(VSInstallDir)VSSDK\VisualStudioIntegration\Common\Inc;$(SolutionDir)packages\Microsoft.VSSDK.Debugger.VSDebugEng.17.14.1051801\build\native\inc;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)Temp\$(ProjectName)_$(PlatformName)_$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Temp\int\$(ProjectName)_$(PlatformName)_$(Configuration)\</IntDir>
+    <IncludePath>$(VSInstallDir)DIA SDK\include;$(VSInstallDir)VSSDK\VisualStudioIntegration\Common\Inc;$(SolutionDir)packages\Microsoft.VSSDK.Debugger.VSDebugEng.17.14.1051801\build\native\inc;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;VSDEBUGENG_USE_CPP11_SCOPED_ENUMS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>bh_agent_debugger_engine.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;VSDEBUGENG_USE_CPP11_SCOPED_ENUMS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>bh_agent_debugger_engine.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;VSDEBUGENG_USE_CPP11_SCOPED_ENUMS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>bh_agent_debugger_engine.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;VSDEBUGENG_USE_CPP11_SCOPED_ENUMS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>bh_agent_debugger_engine.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="bh_agent_local_component.h" />
+    <ClInclude Include="bh_agent_local_component_contract.h" />
+    <ClInclude Include="bh_agent_local_worker_component.h" />
+    <ClInclude Include="bh_agent_local_worker_component_contract.h" />
+    <ClInclude Include="..\packages\Microsoft.VSSDK.Debugger.VSDebugEng.17.14.1051801\build\native\inc\VSDebugEng.h" />
+    <ClInclude Include="..\packages\Microsoft.VSSDK.Debugger.VSDebugEng.17.14.1051801\build\native\inc\vsdebugeng.templates.h" />
+    <ClInclude Include="bh_agent_remote_component.h" />
+    <ClInclude Include="bh_agent_remote_component_contract.h" />
+    <ClInclude Include="bh_typedef.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="bh_agent_local_component.cpp" />
+    <ClCompile Include="bh_agent_local_worker_component.cpp" />
+    <ClCompile Include="bh_agent_remote_component.cpp" />
+    <ClCompile Include="dllmain.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <VsdConfigXmlFiles Include="bh_agent_local_component.vsdconfigxml" />
+    <VsdConfigXmlFiles Include="bh_agent_local_worker_component.vsdconfigxml" />
+    <VsdConfigXmlFiles Include="bh_agent_remote_component.vsdconfigxml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bh_agent_local_component.vsdconfigxml" />
+    <None Include="bh_agent_local_worker_component.vsdconfigxml" />
+    <None Include="bh_agent_debugger_engine.def" />
+    <None Include="bh_agent_remote_component.vsdconfigxml" />
+    <None Include="gen_local_component_contract.bat" />
+    <None Include="gen_local_worker_component_contract.bat" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\Microsoft.VSSDK.Debugger.VSDConfigTool.17.14.1051801\build\Microsoft.VSSDK.Debugger.VSDConfigTool.targets" Condition="Exists('..\packages\Microsoft.VSSDK.Debugger.VSDConfigTool.17.14.1051801\build\Microsoft.VSSDK.Debugger.VSDConfigTool.targets')" />
+    <Import Project="..\packages\Microsoft.VSSDK.Debugger.VSDebugEng.17.14.1051801\build\native\Microsoft.VSSDK.Debugger.VSDebugEng.targets" Condition="Exists('..\packages\Microsoft.VSSDK.Debugger.VSDebugEng.17.14.1051801\build\native\Microsoft.VSSDK.Debugger.VSDebugEng.targets')" />
+  </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.VSSDK.Debugger.VSDConfigTool.17.14.1051801\build\Microsoft.VSSDK.Debugger.VSDConfigTool.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.VSSDK.Debugger.VSDConfigTool.17.14.1051801\build\Microsoft.VSSDK.Debugger.VSDConfigTool.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.VSSDK.Debugger.VSDebugEng.17.14.1051801\build\native\Microsoft.VSSDK.Debugger.VSDebugEng.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.VSSDK.Debugger.VSDebugEng.17.14.1051801\build\native\Microsoft.VSSDK.Debugger.VSDebugEng.targets'))" />
+  </Target>
+</Project>

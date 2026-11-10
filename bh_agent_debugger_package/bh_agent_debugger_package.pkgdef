@@ -1,0 +1,29 @@
+[$RootKey$\Packages\{6B4F7233-9D89-4A09-8B65-8B10E64E2C1F}]
+@="bh_agent_debugger_package Package"
+"InprocServer32"="$PackageFolder$\bh_agent_debugger_package.dll"
+"Class"="bh_agent_debugger_package"
+"CompanyName"="Boiling Lava Hot LLC"
+"ProductName"="BH Agent Debugger"
+"ProductVersion"="0.1"
+"AllowsBackgroundLoad"=dword:00000001
+
+[$RootKey$\InstalledProducts\bh_agent_debugger_package]
+@="BH Agent Debugger"
+"Package"="{6B4F7233-9D89-4A09-8B65-8B10E64E2C1F}"
+"ProductDetails"="Minimal package bootstrap"
+"PID"="0.1"
+"UseInterface"=dword:00000000
+
+[$RootKey$\AutoLoadPackages\{adfc4e61-0397-11d1-9f4e-00a0c911004f}]
+"{6B4F7233-9D89-4A09-8B65-8B10E64E2C1F}"=dword:00000002
+
+; Dump opening needs a target endpoint before a debug session exists.
+[$RootKey$\AutoLoadPackages\{adfc4e63-0397-11d1-9f4e-00a0c911004f}]
+"{6B4F7233-9D89-4A09-8B65-8B10E64E2C1F}"=dword:00000002
+
+[$RootKey$\Services\{D1B0C13A-4EC5-4A93-B8A6-77F285B423B2}]
+@="{6b4f7233-9d89-4a09-8b65-8b10e64e2c1f}"
+"Name"="Sbh_agent_debugger_event_handler"
+"IsAsyncQueryable"=dword:00000000
+"IsFreeThreaded"=dword:00000000
+"IsCacheable"=dword:00000000

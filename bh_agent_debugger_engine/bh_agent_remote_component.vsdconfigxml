@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Configuration xmlns="http://schemas.microsoft.com/vstudio/vsdconfig/2008">
+  <DefineGuid Name="bh_guid_agent_remote_component" Value="3FD6E14F-1D4E-478B-8D07-C94E7E55021D"/>
+  <DefineGuid Name="bh_guid_agent_runtime" Value="F3FC2D84-2597-4968-9D9D-D608115E4B25"/>
+  <DefineGuid Name="bh_guid_native_runtime" Value="66F440C7-5E4B-4480-8258-4B4465080418"/>
+  <DefineGuid Name="bh_guid_agent_message_to_remote" Value="DD0FAEA9-3C8A-44B8-A4B7-CB53A9D62B0B"/>
+  <DefineGuid Name="bh_guid_agent_trap_breakpoint" Value="4AD5E4C2-9D7A-4BE8-A455-346384162D11"/>
+
+  <NativeComponent
+    ComponentId="bh_guid_agent_remote_component"
+    ComponentLevel="40500"
+    ModuleName="bh_agent_debugger_engine.dll">
+    <Class Name="bh_agent_remote_component" ClassId="94BF30A4-28D0-4F8B-9CE8-8D0CBF96D2AD">
+      <Implements>
+        <InterfaceGroup>
+          <NoFilter/>
+          <Interface Name="IDkmModuleInstanceLoadNotification"/>
+          <Interface Name="IDkmProcessContinueNotification"/>
+        </InterfaceGroup>
+
+        <InterfaceGroup>
+          <Filter>
+            <SourceId RequiredValue="bh_guid_agent_message_to_remote"/>
+          </Filter>
+          <Interface Name="IDkmCustomMessageForwardReceiver"/>
+        </InterfaceGroup>
+
+        <InterfaceGroup>
+          <NoFilter/>
+          <Interface Name="IDkmRuntimeBreakpointReceived"/>
+        </InterfaceGroup>
+
+        <InterfaceGroup>
+          <NoFilter/>
+          <Interface Name="IDkmStepCompleteReceived"/>
+          <Interface Name="IDkmSingleStepCompleteReceived"/>
+          <Interface Name="IDkmAsyncBreakCompleteReceived"/>
+        </InterfaceGroup>
+
+        <InterfaceGroup>
+          <Filter>
+            <RuntimeId RequiredValue="bh_guid_native_runtime"/>
+          </Filter>
+          <Interface Name="IDkmRuntimeMonitorBreakpointHandler"/>
+        </InterfaceGroup>
+
+        <InterfaceGroup>
+          <NoFilter/>
+          <Interface Name="IDkmDebugMonitorExceptionNotification"/>
+        </InterfaceGroup>
+
+      </Implements>
+    </Class>
+  </NativeComponent>
+</Configuration>

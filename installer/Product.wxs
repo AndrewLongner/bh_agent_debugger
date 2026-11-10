@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ProductCode is omitted on purpose: WiX generates a new one per build (required for MajorUpgrade).
+     Bump Version together with bh_agent_version.h and vsix\source.extension.vsixmanifest. -->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <!-- The MSI ships Release binaries; build_installer.bat passes -d BhConfiguration=Debug only for
+       local installer debugging. -->
+  <?ifndef BhConfiguration?>
+  <?define BhConfiguration = Release?>
+  <?endif?>
+  <Package
+    Name="BH Agent Debugger"
+    Manufacturer="Boiling Lava Hot LLC"
+    Version="1.0.0"
+    UpgradeCode="54A0909D-6B5C-4BE1-BE8E-6CD1DD4B2B75"
+    InstallerVersion="500"
+    Scope="perUser"
+    Compressed="yes">
+
+    <SummaryInformation Description="BH Agent Debugger installer" />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of BH Agent Debugger is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Per-user only: the payload goes under the user's LocalAppData, the registry values under HKCU
+         and the extension into that user's Visual Studio profiles, so no step needs administrator
+         rights. A per-machine install would change only the Windows Installer registration. -->
+    <Property Id="REBOOT" Value="ReallySuppress" Secure="yes" />
+    <!-- Skip the System Restore point Windows Installer creates before installing (often 10-30 s). -->
+    <Property Id="MSIFASTINSTALL" Value="1" />
+    <Property Id="ApplicationFolderName" Value="BH Agent Debugger" />
+    <!-- Links shown in Windows' installed-apps list. -->
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/AndrewLongner/bh_agent_debugger" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/AndrewLongner/bh_agent_debugger/issues" />
+    <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(sys.SOURCEFILEDIR)license_mit.rtf" />
+
+    <UI>
+      <UIText Id="CustomizeDlgItemDescription" Value="Select a feature to see its description." />
+      <UIText Id="CustomizeDlgItemSize" Value="Space required: [1]" />
+      <UIText Id="CustomizeDlgLocation" Value="[1]" />
+
+      <DialogRef Id="BrowseDlg" />
+      <DialogRef Id="CancelDlg" />
+      <DialogRef Id="DiskCostDlg" />
+      <DialogRef Id="ErrorDlg" />
+      <DialogRef Id="ExitDialog" />
+      <DialogRef Id="FatalError" />
+      <DialogRef Id="FilesInUse" />
+      <DialogRef Id="InstallDirDlg" />
+      <DialogRef Id="InvalidDirDlg" />
+      <DialogRef Id="LicenseAgreementDlg" />
+      <DialogRef Id="MaintenanceTypeDlg" />
+      <DialogRef Id="MaintenanceWelcomeDlg" />
+      <DialogRef Id="MsiRMFilesInUse" />
+      <DialogRef Id="OutOfDiskDlg" />
+      <DialogRef Id="OutOfRbDiskDlg" />
+      <DialogRef Id="PrepareDlg" />
+      <DialogRef Id="ProgressDlg" />
+      <DialogRef Id="ResumeDlg" />
+      <DialogRef Id="UserExit" />
+      <DialogRef Id="VerifyReadyDlg" />
+      <DialogRef Id="WaitForCostingDlg" />
+      <DialogRef Id="WelcomeDlg" />
+
+      <Dialog Id="BhCustomizeDlg" X="50" Y="50" Width="370" Height="270" TrackDiskSpace="yes" Title="[ProductName] Setup">
+        <Control Id="Tree" Type="SelectionTree" X="25" Y="85" Width="175" Height="115" Text="Tree of selections" Sunken="yes" Property="_BrowseProperty" TabSkip="no" />
+        <Control Id="Reset" Type="PushButton" X="10" Y="243" Width="81" Height="17" Text="Re&amp;set" TabSkip="no">
+          <Publish Event="Reset" Value="0" />
+          <Subscribe Event="SelectionNoItems" Attribute="Enabled" />
+        </Control>
+        <Control Id="DiskCost" Type="PushButton" X="91" Y="243" Width="100" Height="17" Text="Disk &amp;Usage" TabSkip="no">
+          <Publish Event="SpawnDialog" Value="DiskCostDlg" />
+          <Subscribe Event="SelectionNoItems" Attribute="Enabled" />
+        </Control>
+        <Control Id="Back" Type="PushButton" X="192" Y="243" Width="56" Height="17" Text="&amp;Back" TabSkip="no">
+          <Publish Event="NewDialog" Value="LicenseAgreementDlg" Condition="NOT Installed" />
+          <Publish Event="NewDialog" Value="BhMaintenanceTypeDlg" Condition="Installed" />
+        </Control>
+        <Control Id="Next" Type="PushButton" X="248" Y="243" Width="56" Height="17" Text="&amp;Next" TabSkip="no" Default="yes">
+          <Publish Event="NewDialog" Value="InstallDirDlg" Condition="NOT Installed" />
+          <Publish Event="NewDialog" Value="VerifyReadyDlg" Condition="Installed" />
+          <Subscribe Event="SelectionNoItems" Attribute="Enabled" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Text="Cancel" TabSkip="no" Cancel="yes">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" Text="WixUI_Bmp_Banner" Disabled="yes" TabSkip="no" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Text="Select the way you want features to be installed." Transparent="yes" NoPrefix="yes" TabSkip="yes" />
+        <Control Id="Text" Type="Text" X="25" Y="55" Width="320" Height="20" Text="Click the icons in the tree below to change the way features will be installed." TabSkip="yes" />
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="210" Height="15" Text="{\WixUI_Font_Title}Custom Setup" Transparent="yes" NoPrefix="yes" TabSkip="yes" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" Disabled="yes" TabSkip="yes" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" Disabled="yes" TabSkip="yes" />
+        <Control Id="Box" Type="GroupBox" X="210" Y="81" Width="150" Height="118" TabSkip="yes" />
+        <Control Id="ItemDescription" Type="Text" X="215" Y="90" Width="131" Height="50" Text="Select a feature to see its description." TabSkip="yes">
+          <Subscribe Event="SelectionDescription" Attribute="Text" />
+        </Control>
+        <Control Id="ItemSize" Type="Text" X="215" Y="140" Width="131" Height="50" Text="Space required:" TabSkip="yes">
+          <Subscribe Event="SelectionSize" Attribute="Text" />
+        </Control>
+      </Dialog>
+
+      <Dialog Id="BhMaintenanceTypeDlg" X="50" Y="50" Width="370" Height="270" Title="[ProductName] Setup">
+        <Control Id="ChangeButton" Type="PushButton" X="40" Y="65" Width="80" Height="17" Text="&amp;Change" ToolTip="Change Installation" DisableCondition="ARPNOMODIFY OR BURNMSIREPAIR OR BURNMSIUNINSTALL" TabSkip="no" Default="yes">
+          <Publish Property="WixUI_InstallMode" Value="Change" Order="1" />
+          <Publish Event="NewDialog" Value="BhCustomizeDlg" Order="2" />
+        </Control>
+        <Control Id="RepairButton" Type="PushButton" X="40" Y="118" Width="80" Height="17" Text="Re&amp;pair" ToolTip="Repair Installation" DisableCondition="ARPNOREPAIR OR BURNMSIMODIFY OR BURNMSIUNINSTALL" TabSkip="no">
+          <Publish Property="WixUI_InstallMode" Value="Repair" Order="1" />
+          <Publish Property="REINSTALL" Value="ALL" Order="2" />
+          <Publish Property="REINSTALLMODE" Value="omus" Order="3" />
+          <Publish Event="NewDialog" Value="VerifyReadyDlg" Order="4" />
+        </Control>
+        <Control Id="RemoveButton" Type="PushButton" X="40" Y="171" Width="80" Height="17" Text="&amp;Remove" ToolTip="Remove Installation" DisableCondition="ARPNOREMOVE OR BURNMSIREPAIR OR BURNMSIMODIFY" TabSkip="no">
+          <Publish Property="WixUI_InstallMode" Value="Remove" Order="1" />
+          <Publish Property="REMOVE" Value="ALL" Order="2" />
+          <Publish Event="NewDialog" Value="VerifyReadyDlg" Order="3" />
+        </Control>
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="&amp;Back" TabSkip="no">
+          <Publish Event="NewDialog" Value="MaintenanceWelcomeDlg" />
+        </Control>
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Text="&amp;Next" Disabled="yes" TabSkip="no" />
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Text="Cancel" TabSkip="no" Cancel="yes">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" Text="WixUI_Bmp_Banner" Disabled="yes" TabSkip="no" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="340" Height="20" Text="Select the operation you wish to perform." Transparent="yes" NoPrefix="yes" TabSkip="yes" />
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="340" Height="15" Text="{\WixUI_Font_Title}Change, repair, or remove installation" Transparent="yes" NoPrefix="yes" TabSkip="yes" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" Disabled="yes" TabSkip="yes" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" Disabled="yes" TabSkip="yes" />
+        <Control Id="ChangeText" Type="Text" X="60" Y="85" Width="280" Height="20" Text="Lets you change the way features are installed." HideCondition="ARPNOMODIFY OR BURNMSIREPAIR OR BURNMSIUNINSTALL" TabSkip="yes" />
+        <Control Id="ChangeDisabledText" Type="Text" X="60" Y="85" Width="280" Height="20" Text="[ProductName] has no independently selectable features." Hidden="yes" NoPrefix="yes" ShowCondition="ARPNOMODIFY OR BURNMSIREPAIR OR BURNMSIUNINSTALL" TabSkip="yes" />
+        <Control Id="RepairText" Type="Text" X="60" Y="138" Width="280" Height="30" Text="Repairs errors in the most recent installation by fixing missing and corrupt files, shortcuts, and registry entries." HideCondition="ARPNOREPAIR OR BURNMSIMODIFY OR BURNMSIUNINSTALL" TabSkip="yes" />
+        <Control Id="RepairDisabledText" Type="Text" X="60" Y="138" Width="280" Height="30" Text="[ProductName] cannot be repaired." Hidden="yes" NoPrefix="yes" ShowCondition="ARPNOREPAIR OR BURNMSIMODIFY OR BURNMSIUNINSTALL" TabSkip="yes" />
+        <Control Id="RemoveText" Type="Text" X="60" Y="191" Width="280" Height="20" Text="Removes [ProductName] from your computer." NoPrefix="yes" HideCondition="ARPNOREMOVE OR BURNMSIREPAIR OR BURNMSIMODIFY" TabSkip="yes" />
+        <Control Id="RemoveDisabledText" Type="Text" X="60" Y="191" Width="280" Height="20" Text="[ProductName] cannot be removed." Hidden="yes" NoPrefix="yes" ShowCondition="ARPNOREMOVE OR BURNMSIREPAIR OR BURNMSIMODIFY" TabSkip="yes" />
+      </Dialog>
+
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg" Condition="NOT Installed" />
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceWelcomeDlg" Condition="Installed" />
+      <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="BhMaintenanceTypeDlg" Order="2" />
+
+      <Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" />
+      <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="BhCustomizeDlg" Condition="LicenseAccepted = &quot;1&quot; AND NOT Installed" />
+
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="BhCustomizeDlg" />
+      <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" />
+      <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" />
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" />
+
+      <Publish Dialog="BrowseDlg" Control="OK" Event="SetTargetPath" Value="[_BrowseProperty]" Order="1" />
+      <Publish Dialog="BrowseDlg" Control="OK" Event="EndDialog" Value="Return" Order="2" />
+
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg" Condition="NOT Installed" />
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="BhCustomizeDlg" Condition="Installed AND WixUI_InstallMode = &quot;Change&quot;" />
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="BhMaintenanceTypeDlg" Condition="Installed AND WixUI_InstallMode &lt;&gt; &quot;Change&quot;" />
+      <Publish Dialog="VerifyReadyDlg" Control="Install" Event="DoAction" Value="caRequireVsClosed" Order="0" Condition="(&amp;Vs2022ExtensionFeature=3) OR (Installed AND !Vs2022ExtensionFeature=3)" />
+      <Publish Dialog="VerifyReadyDlg" Control="InstallNoShield" Event="DoAction" Value="caRequireVsClosed" Order="0" Condition="(&amp;Vs2022ExtensionFeature=3) OR (Installed AND !Vs2022ExtensionFeature=3)" />
+      <Publish Dialog="VerifyReadyDlg" Control="Change" Event="DoAction" Value="caRequireVsClosed" Order="0" Condition="(&amp;Vs2022ExtensionFeature=3) OR (Installed AND !Vs2022ExtensionFeature=3)" />
+      <Publish Dialog="VerifyReadyDlg" Control="ChangeNoShield" Event="DoAction" Value="caRequireVsClosed" Order="0" Condition="(&amp;Vs2022ExtensionFeature=3) OR (Installed AND !Vs2022ExtensionFeature=3)" />
+      <Publish Dialog="VerifyReadyDlg" Control="Repair" Event="DoAction" Value="caRequireVsClosed" Order="0" Condition="(&amp;Vs2022ExtensionFeature=3) OR (Installed AND !Vs2022ExtensionFeature=3)" />
+      <Publish Dialog="VerifyReadyDlg" Control="Remove" Event="DoAction" Value="caRequireVsClosed" Order="0" Condition="(&amp;Vs2022ExtensionFeature=3) OR (Installed AND !Vs2022ExtensionFeature=3)" />
+      <Publish Dialog="VerifyReadyDlg" Control="RemoveNoShield" Event="DoAction" Value="caRequireVsClosed" Order="0" Condition="(&amp;Vs2022ExtensionFeature=3) OR (Installed AND !Vs2022ExtensionFeature=3)" />
+      <Publish Dialog="VerifyReadyDlg" Control="Update" Event="DoAction" Value="caRequireVsClosed" Order="0" Condition="(&amp;Vs2022ExtensionFeature=3) OR (Installed AND !Vs2022ExtensionFeature=3)" />
+      <Publish Dialog="VerifyReadyDlg" Control="UpdateNoShield" Event="DoAction" Value="caRequireVsClosed" Order="0" Condition="(&amp;Vs2022ExtensionFeature=3) OR (Installed AND !Vs2022ExtensionFeature=3)" />
+
+      <Publish Dialog="ProgressDlg" Control="Next" Event="NewDialog" Value="ExitDialog" />
+      <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999" />
+    </UI>
+
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="ProgramsFolder" Name="Programs">
+      <Directory Id="APPLICATIONFOLDER" Name="BH Agent Debugger">
+        <Directory Id="BINFOLDER" Name="bin" />
+        <Directory Id="OPENCODEFOLDER" Name="opencode">
+          <Directory Id="OPENCODE_TOOLS_FOLDER" Name="tools" />
+          <Directory Id="OPENCODE_SKILLS_FOLDER" Name="skills">
+            <Directory Id="OPENCODE_SKILL_BH_FOLDER" Name="bh-agent-debugger" />
+          </Directory>
+        </Directory>
+        <Directory Id="EXTENSIONFOLDER" Name="extension">
+        </Directory>
+      </Directory>
+      </Directory>
+    </StandardDirectory>
+
+    <DirectoryRef Id="BINFOLDER">
+      <Component Id="cmpCli" Guid="*">
+        <File Id="filCli" Source="$(sys.SOURCEFILEDIR)..\Temp\bh_agent_debugger_cli_x64_$(var.BhConfiguration)\bh_agent_debugger_cli.exe" KeyPath="yes" />
+      </Component>
+
+      <Component Id="cmpService" Guid="*">
+        <File Id="filService" Source="$(sys.SOURCEFILEDIR)..\Temp\bh_agent_debugger_service_x64_$(var.BhConfiguration)\bh_agent_debugger_service.exe" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="APPLICATIONFOLDER">
+      <Component Id="cmpEnvVarsUser" Guid="*">
+        <Environment Id="envServiceExeUser" Name="BH_AGENT_SERVICE_EXE" Value="[BINFOLDER]bh_agent_debugger_service.exe" Action="set" Part="all" />
+        <Environment Id="envServiceTaskUser" Name="BH_AGENT_SERVICE_TASK" Value="bh_agent_debugger_start_service_desktop_user" Action="set" Part="all" />
+        <RegistryValue Root="HKCU" Key="Software\Boiling Lava Hot\BH Agent Debugger" Name="EnvConfigured" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+
+      <Component Id="cmpPathUser" Guid="*">
+        <Environment Id="envPathUser" Name="PATH" Value="[BINFOLDER]" Action="set" Part="last" />
+        <RegistryValue Root="HKCU" Key="Software\Boiling Lava Hot\BH Agent Debugger" Name="PathConfigured" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+
+      <!-- This product's license and notices. They live in the application folder, not in bin\,
+           where the self-contained analyzer keeps the .NET runtime's dotnet-*.txt license files. -->
+      <Component Id="cmpLicense" Guid="*">
+        <File Id="filLicense" Name="LICENSE.txt" Source="$(sys.SOURCEFILEDIR)..\LICENSE" KeyPath="yes" />
+      </Component>
+
+      <Component Id="cmpThirdPartyNotices" Guid="*">
+        <File Id="filThirdPartyNotices" Name="THIRD_PARTY_NOTICES.txt" Source="$(sys.SOURCEFILEDIR)..\THIRD_PARTY_NOTICES.txt" KeyPath="yes" />
+      </Component>
+
+    </DirectoryRef>
+
+    <DirectoryRef Id="OPENCODE_TOOLS_FOLDER">
+      <Component Id="cmpOpenCodeToolPayload" Guid="*">
+        <File Id="filOpenCodeToolPayload" Source="$(sys.SOURCEFILEDIR)..\opencode\tools\bh_agent_debugger.ts" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="OPENCODE_SKILL_BH_FOLDER">
+      <Component Id="cmpOpenCodeSkillPayload" Guid="*">
+        <File Id="filOpenCodeSkillPayload" Source="$(sys.SOURCEFILEDIR)..\opencode\skills\bh-agent-debugger\SKILL.md" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="EXTENSIONFOLDER">
+      <Component Id="cmpExtensionVsix" Guid="*">
+        <File Id="filExtensionVsix" Source="$(sys.SOURCEFILEDIR)..\Temp\vsix_x64_$(var.BhConfiguration)\bh_agent_debugger.vsix" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <Feature Id="MainFeature" Title="BH Agent Debugger" Level="1" AllowAbsent="no" AllowAdvertise="no" ConfigurableDirectory="APPLICATIONFOLDER">
+      <ComponentRef Id="cmpCli" />
+      <ComponentRef Id="cmpService" />
+      <ComponentGroupRef Id="AnalyzerPayload" />
+      <ComponentRef Id="cmpEnvVarsUser" />
+      <ComponentRef Id="cmpLicense" />
+      <ComponentRef Id="cmpThirdPartyNotices" />
+    </Feature>
+
+    <Feature Id="Vs2022ExtensionFeature" Title="Install Visual Studio 2022/2026 Extension" Level="1" Display="expand" ConfigurableDirectory="APPLICATIONFOLDER">
+      <ComponentRef Id="cmpExtensionVsix" />
+    </Feature>
+
+    <Binary Id="binInstallerCa" SourceFile="$(sys.SOURCEFILEDIR)..\Temp\installer\bh_agent_debugger_installer_ca_x64_$(var.BhConfiguration)\bh_agent_debugger_installer_ca.dll" />
+
+    <Feature Id="CliPathFeature" Title="Add CLI to PATH" Level="1" Display="expand" ConfigurableDirectory="APPLICATIONFOLDER">
+      <ComponentRef Id="cmpPathUser" />
+    </Feature>
+
+    <Feature Id="OpenCodeWindowsFeature" Title="OpenCode Tool/Skill (Windows)" Level="1" Display="expand" ConfigurableDirectory="APPLICATIONFOLDER">
+      <ComponentRef Id="cmpOpenCodeToolPayload" />
+      <ComponentRef Id="cmpOpenCodeSkillPayload" />
+    </Feature>
+
+    <Feature Id="OpenCodeWslFeature" Title="OpenCode Tool/Skill (WSL)" Level="1" Display="expand" ConfigurableDirectory="APPLICATIONFOLDER">
+      <ComponentRef Id="cmpOpenCodeToolPayload" />
+      <ComponentRef Id="cmpOpenCodeSkillPayload" />
+    </Feature>
+
+    <!-- Copies the skill to <Claude config folder>\skills\bh-agent-debugger and runs
+         claude mcp add for this user; skipped when Claude Code is not installed. -->
+    <Feature Id="ClaudeCodeFeature" Title="Claude Code Skill and MCP Server" Description="Adds the skill and the bh_agent_debugger MCP server to Claude Code for your account. Skipped when Claude Code is not installed." Level="1" Display="expand" ConfigurableDirectory="APPLICATIONFOLDER">
+      <ComponentRef Id="cmpOpenCodeSkillPayload" />
+    </Feature>
+
+    <!-- Copies the skill to %USERPROFILE%\.agents\skills\bh-agent-debugger and runs codex mcp add for
+         this user; skipped when Codex is not installed on Windows. -->
+    <Feature Id="CodexFeature" Title="Codex Skill and MCP Server (Windows)" Description="Adds the skill and the bh_agent_debugger MCP server to Codex on Windows for your account. Skipped when Codex is not installed." Level="1" Display="expand" ConfigurableDirectory="APPLICATIONFOLDER">
+      <ComponentRef Id="cmpOpenCodeSkillPayload" />
+    </Feature>
+
+    <!-- The same for Codex in the default WSL distribution, which then starts the Windows CLI. -->
+    <Feature Id="CodexWslFeature" Title="Codex Skill and MCP Server (WSL)" Description="Adds the skill and the bh_agent_debugger MCP server to Codex in your default WSL distribution. Skipped without WSL or without Codex in it." Level="1" Display="expand" ConfigurableDirectory="APPLICATIONFOLDER">
+      <ComponentRef Id="cmpOpenCodeSkillPayload" />
+    </Feature>
+
+    <CustomAction
+      Id="caCreateDesktopTaskUser"
+      BinaryRef="binInstallerCa"
+      DllEntry="CreateDesktopTaskUser"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caDeleteDesktopTaskUser"
+      BinaryRef="binInstallerCa"
+      DllEntry="DeleteDesktopTaskUser"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caStopAgentProcesses"
+      BinaryRef="binInstallerCa"
+      DllEntry="StopAgentProcesses"
+      Execute="immediate"
+      Return="check" />
+
+    <CustomAction
+      Id="caSyncOpenCodeWindows"
+      BinaryRef="binInstallerCa"
+      DllEntry="SyncOpenCodeWindows"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caSyncOpenCodeWsl"
+      BinaryRef="binInstallerCa"
+      DllEntry="SyncOpenCodeWsl"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caSyncClaudeCode"
+      BinaryRef="binInstallerCa"
+      DllEntry="SyncClaudeCode"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caSyncCodex"
+      BinaryRef="binInstallerCa"
+      DllEntry="SyncCodex"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caSyncCodexWsl"
+      BinaryRef="binInstallerCa"
+      DllEntry="SyncCodexWsl"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caRequireVsClosed"
+      BinaryRef="binInstallerCa"
+      DllEntry="RequireVsClosed"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="check" />
+
+    <CustomAction
+      Id="caSyncVsExtensions"
+      BinaryRef="binInstallerCa"
+      DllEntry="SyncVsExtensions"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caCleanupVsExtensions"
+      BinaryRef="binInstallerCa"
+      DllEntry="CleanupVsExtensions"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caCleanupOpenCodeWindows"
+      BinaryRef="binInstallerCa"
+      DllEntry="CleanupOpenCodeWindows"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caCleanupOpenCodeWsl"
+      BinaryRef="binInstallerCa"
+      DllEntry="CleanupOpenCodeWsl"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caCleanupClaudeCode"
+      BinaryRef="binInstallerCa"
+      DllEntry="CleanupClaudeCode"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caCleanupCodex"
+      BinaryRef="binInstallerCa"
+      DllEntry="CleanupCodex"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caCleanupCodexWsl"
+      BinaryRef="binInstallerCa"
+      DllEntry="CleanupCodexWsl"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <!-- Post-upgrade cleanups: the old product skips its cleanups while being upgraded
+         (UPGRADINGPRODUCTCODE), so the new product removes extension/OpenCode payloads only
+         when the upgrade itself drops that feature. Normally MigrateFeatureStates keeps them. -->
+    <CustomAction
+      Id="caUpgradeCleanupVsExtensions"
+      BinaryRef="binInstallerCa"
+      DllEntry="CleanupVsExtensions"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caUpgradeCleanupOpenCodeWindows"
+      BinaryRef="binInstallerCa"
+      DllEntry="CleanupOpenCodeWindows"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caUpgradeCleanupOpenCodeWsl"
+      BinaryRef="binInstallerCa"
+      DllEntry="CleanupOpenCodeWsl"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caUpgradeCleanupClaudeCode"
+      BinaryRef="binInstallerCa"
+      DllEntry="CleanupClaudeCode"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caUpgradeCleanupCodex"
+      BinaryRef="binInstallerCa"
+      DllEntry="CleanupCodex"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <CustomAction
+      Id="caUpgradeCleanupCodexWsl"
+      BinaryRef="binInstallerCa"
+      DllEntry="CleanupCodexWsl"
+      Execute="immediate"
+      Impersonate="yes"
+      Return="ignore" />
+
+    <InstallExecuteSequence>
+      <Custom Action="caStopAgentProcesses" Before="InstallValidate" Condition="Installed OR &amp;MainFeature=3 OR REMOVE~=&quot;ALL&quot;" />
+      <Custom Action="caCreateDesktopTaskUser" After="InstallFinalize" Condition="NOT REMOVE~=&quot;ALL&quot; AND (&amp;MainFeature=3 OR !MainFeature=3)" />
+      <Custom Action="caSyncVsExtensions" After="caCreateDesktopTaskUser" Condition="NOT REMOVE~=&quot;ALL&quot; AND (&amp;Vs2022ExtensionFeature=3 OR !Vs2022ExtensionFeature=3)" />
+      <!-- NOT &amp;...=2: the installed state (!) stays 3 for the whole session, so without it the sync
+           would add back what the cleanup of a feature being removed has just taken away (the skill
+           payload stays on disk while another feature still uses it). -->
+      <Custom Action="caSyncOpenCodeWindows" After="caSyncVsExtensions" Condition="NOT REMOVE~=&quot;ALL&quot; AND (&amp;OpenCodeWindowsFeature=3 OR (!OpenCodeWindowsFeature=3 AND NOT &amp;OpenCodeWindowsFeature=2))" />
+      <Custom Action="caSyncOpenCodeWsl" After="caSyncOpenCodeWindows" Condition="NOT REMOVE~=&quot;ALL&quot; AND (&amp;OpenCodeWslFeature=3 OR (!OpenCodeWslFeature=3 AND NOT &amp;OpenCodeWslFeature=2))" />
+      <Custom Action="caSyncClaudeCode" After="caSyncOpenCodeWsl" Condition="NOT REMOVE~=&quot;ALL&quot; AND (&amp;ClaudeCodeFeature=3 OR (!ClaudeCodeFeature=3 AND NOT &amp;ClaudeCodeFeature=2))" />
+      <Custom Action="caSyncCodex" After="caSyncClaudeCode" Condition="NOT REMOVE~=&quot;ALL&quot; AND (&amp;CodexFeature=3 OR (!CodexFeature=3 AND NOT &amp;CodexFeature=2))" />
+      <Custom Action="caSyncCodexWsl" After="caSyncCodex" Condition="NOT REMOVE~=&quot;ALL&quot; AND (&amp;CodexWslFeature=3 OR (!CodexWslFeature=3 AND NOT &amp;CodexWslFeature=2))" />
+      <!-- NOT UPGRADINGPRODUCTCODE: during a major upgrade the new product re-syncs these in place,
+           so removing them first only adds a VSIXInstaller /u run (~25 s) and WSL start-up. -->
+      <Custom Action="caCleanupOpenCodeWindows" Before="RemoveFiles" Condition="((Installed AND !OpenCodeWindowsFeature=3 AND &amp;OpenCodeWindowsFeature=2) OR REMOVE~=&quot;ALL&quot;) AND NOT UPGRADINGPRODUCTCODE" />
+      <Custom Action="caCleanupOpenCodeWsl" Before="RemoveFiles" Condition="((Installed AND !OpenCodeWslFeature=3 AND &amp;OpenCodeWslFeature=2) OR REMOVE~=&quot;ALL&quot;) AND NOT UPGRADINGPRODUCTCODE" />
+      <Custom Action="caCleanupClaudeCode" Before="RemoveFiles" Condition="((Installed AND !ClaudeCodeFeature=3 AND &amp;ClaudeCodeFeature=2) OR REMOVE~=&quot;ALL&quot;) AND NOT UPGRADINGPRODUCTCODE" />
+      <Custom Action="caCleanupCodex" Before="RemoveFiles" Condition="((Installed AND !CodexFeature=3 AND &amp;CodexFeature=2) OR REMOVE~=&quot;ALL&quot;) AND NOT UPGRADINGPRODUCTCODE" />
+      <Custom Action="caCleanupCodexWsl" Before="RemoveFiles" Condition="((Installed AND !CodexWslFeature=3 AND &amp;CodexWslFeature=2) OR REMOVE~=&quot;ALL&quot;) AND NOT UPGRADINGPRODUCTCODE" />
+      <Custom Action="caCleanupVsExtensions" Before="RemoveFiles" Condition="Installed AND !Vs2022ExtensionFeature=3 AND (&amp;Vs2022ExtensionFeature=2 OR REMOVE~=&quot;ALL&quot;) AND NOT UPGRADINGPRODUCTCODE" />
+      <Custom Action="caUpgradeCleanupVsExtensions" After="caSyncCodexWsl" Condition="WIX_UPGRADE_DETECTED AND NOT Installed AND NOT REMOVE~=&quot;ALL&quot; AND NOT &amp;Vs2022ExtensionFeature=3" />
+      <Custom Action="caUpgradeCleanupOpenCodeWindows" After="caUpgradeCleanupVsExtensions" Condition="WIX_UPGRADE_DETECTED AND NOT Installed AND NOT REMOVE~=&quot;ALL&quot; AND NOT &amp;OpenCodeWindowsFeature=3" />
+      <Custom Action="caUpgradeCleanupOpenCodeWsl" After="caUpgradeCleanupOpenCodeWindows" Condition="WIX_UPGRADE_DETECTED AND NOT Installed AND NOT REMOVE~=&quot;ALL&quot; AND NOT &amp;OpenCodeWslFeature=3" />
+      <Custom Action="caUpgradeCleanupClaudeCode" After="caUpgradeCleanupOpenCodeWsl" Condition="WIX_UPGRADE_DETECTED AND NOT Installed AND NOT REMOVE~=&quot;ALL&quot; AND NOT &amp;ClaudeCodeFeature=3" />
+      <Custom Action="caUpgradeCleanupCodex" After="caUpgradeCleanupClaudeCode" Condition="WIX_UPGRADE_DETECTED AND NOT Installed AND NOT REMOVE~=&quot;ALL&quot; AND NOT &amp;CodexFeature=3" />
+      <Custom Action="caUpgradeCleanupCodexWsl" After="caUpgradeCleanupCodex" Condition="WIX_UPGRADE_DETECTED AND NOT Installed AND NOT REMOVE~=&quot;ALL&quot; AND NOT &amp;CodexWslFeature=3" />
+      <Custom Action="caDeleteDesktopTaskUser" Before="RemoveFiles" Condition="REMOVE~=&quot;ALL&quot;" />
+    </InstallExecuteSequence>
+
+  </Package>
+  <Fragment>
+    <ComponentGroup Id="AnalyzerPayload" Directory="BINFOLDER">
+      <Files Include="$(sys.SOURCEFILEDIR)..\Temp\installer\analyzer\**" />
+    </ComponentGroup>
+  </Fragment>
+</Wix>

@@ -1,0 +1,6 @@
+# one CLI command per line (without the executable name)
+# chain-run also accepts "start debugging <solution-hint>" lines.
+start debugging bh_agent_debugger
+start debugging TargetApp
+targets-list
+doctor

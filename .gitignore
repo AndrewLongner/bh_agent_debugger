@@ -1,0 +1,19 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.cache/clangd/index
+/.vs/bh_agent_debugger
+/packages
+/Temp
+/TargetApp/.vs/TargetApp
+/nul
+/bh_agent_debugger_cli/.vs/bh_agent_debugger_cli
+/bh_agent_debugger_service/.vs/bh_agent_debugger_service
+/installer/__pycache__
+/bh_profile_analyzer/bin
+/bh_profile_analyzer/obj
+/.wix
+/compile_commands.json
+/AGENTS_INTERNAL.md
+/vsix/vsix.vcxproj.user

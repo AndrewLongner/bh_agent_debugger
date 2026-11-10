@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Configuration xmlns="http://schemas.microsoft.com/vstudio/vsdconfig/2008">
+  <DefineGuid Name="bh_guid_agent_local_component" Value="87F9E4DD-3FD0-4A2F-9F56-ECF4C9A6D802"/>
+  <DefineGuid Name="bh_guid_agent_message_to_local" Value="1F3D8A6E-8DE6-4CCB-B18C-3AA44102F501"/>
+
+  <NativeComponent ComponentId="bh_guid_agent_local_component" ComponentLevel="9995000" ModuleName="bh_agent_debugger_engine.dll">
+    <Class Name="bh_agent_local_component" ClassId="B8D3DE24-8F7F-43EA-B32F-0A54DDB70F49">
+      <Implements>
+        <InterfaceGroup>
+          <Filter>
+            <SourceId RequiredValue="bh_guid_agent_message_to_local"/>
+          </Filter>
+          <Interface Name="IDkmCustomMessageCallbackReceiver"/>
+        </InterfaceGroup>
+
+        <InterfaceGroup>
+          <Filter>
+            <SourceId RequiredValue="bh_guid_agent_message_to_local"/>
+          </Filter>
+          <Interface Name="IDkmCustomMessageForwardReceiver"/>
+        </InterfaceGroup>
+      </Implements>
+    </Class>
+  </NativeComponent>
+</Configuration>

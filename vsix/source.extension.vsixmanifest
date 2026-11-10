@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Id="boiling-lava-hot-agent-debugger.6A7FD49D-C71A-45AB-A816-8F279F2583E2" Version="1.0.0" Language="en-US" Publisher="Boiling Lava Hot LLC" />
+    <DisplayName>BH Agent Debugger</DisplayName>
+    <Description xml:space="preserve">BH Agent Debugger extension for AI agents, providing Visual Studio integration for breakpoints, inspection, and troubleshooting.</Description>
+    <MoreInfo>https://github.com/AndrewLongner/bh_agent_debugger</MoreInfo>
+  </Metadata>
+
+  <Installation InstalledByMsi="false">
+    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 19.0)">
+      <ProductArchitecture>amd64</ProductArchitecture>
+    </InstallationTarget>
+  </Installation>
+
+  <Prerequisites>
+    <Prerequisite Id="Microsoft.VisualStudio.Debugger" Version="[17.0,)" DisplayName="Visual Studio Debugger" />
+  </Prerequisites>
+
+  <Assets>
+    <Asset Type="DebuggerEngineExtension" Path="bh_agent_debugger_engine.vsdconfig" />
+    <Asset Type="Microsoft.VisualStudio.VsPackage" Path="bh_agent_debugger_package.pkgdef" />
+  </Assets>
+</PackageManifest>

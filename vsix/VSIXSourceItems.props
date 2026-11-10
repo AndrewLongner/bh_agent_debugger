@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
+  <PropertyGroup>
+    <BhPackageOutDir>$(SolutionDir)Temp\bh_agent_debugger_package_$(PlatformName)_$(Configuration)\</BhPackageOutDir>
+    <BhEngineOutDirX64>$(SolutionDir)Temp\bh_agent_debugger_engine_x64_$(Configuration)\</BhEngineOutDirX64>
+    <BhEngineOutDirX86>$(SolutionDir)Temp\bh_agent_debugger_engine_Win32_$(Configuration)\</BhEngineOutDirX86>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <VSIXSourceItem Include="$(BhEngineOutDirX64)bh_agent_debugger_engine.vsdconfig" />
+    <VSIXSourceItem Include="$(BhEngineOutDirX64)bh_agent_debugger_engine.dll">
+      <TargetPath>x64\bh_agent_debugger_engine.dll</TargetPath>
+    </VSIXSourceItem>
+    <VSIXSourceItem Include="$(BhEngineOutDirX86)bh_agent_debugger_engine.dll">
+      <TargetPath>x86\bh_agent_debugger_engine.dll</TargetPath>
+    </VSIXSourceItem>
+    <VSIXSourceItem Include="$(BhPackageOutDir)bh_agent_debugger_package.dll" />
+    <VSIXSourceItem Include="$(SolutionDir)bh_agent_debugger_package\bh_agent_debugger_package.pkgdef" />
+    <VSIXSourceItem Include="$(SolutionDir)LICENSE">
+      <TargetPath>LICENSE.txt</TargetPath>
+    </VSIXSourceItem>
+    <VSIXSourceItem Include="$(SolutionDir)THIRD_PARTY_NOTICES.txt" />
+  </ItemGroup>
+</Project>
