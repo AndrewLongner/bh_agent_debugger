@@ -54,6 +54,7 @@ Useful when a user runs older installed binaries (`doctor` shows the versions):
 | 0.13.3 | The MSI installs the skill into Codex on Windows and in WSL and registers the MCP server |
 | 1.0.0 | First public release; the MSI skips the Windows Codex MCP registration when `codex --version` fails |
 | 1.0.1 | `continue` returns once Visual Studio reports run mode, so a `break` right after it works |
+| 1.0.2 | A `continue` that stops again at once (for example at a breakpoint) returns `ok: executed continue \| break hit \| stable break` instead of timing out |
 
 ## Profiling internals
 

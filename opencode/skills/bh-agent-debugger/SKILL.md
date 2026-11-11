@@ -5,7 +5,7 @@ description: Drive the Visual Studio 2022/2026 debugger with BH Agent Debugger (
 
 # BH Agent Debugger
 
-This skill matches BH Agent Debugger **1.0.1**. BH Agent Debugger lets an agent drive Visual Studio 2022
+This skill matches BH Agent Debugger **1.0.2**. BH Agent Debugger lets an agent drive Visual Studio 2022
 (17.x) or 2026 (18.x) instances that have the BH Agent Debugger extension, through a local broker
 service.
 

@@ -10,7 +10,7 @@
   <Package
     Name="BH Agent Debugger"
     Manufacturer="Boiling Lava Hot LLC"
-    Version="1.0.1"
+    Version="1.0.2"
     UpgradeCode="54A0909D-6B5C-4BE1-BE8E-6CD1DD4B2B75"
     InstallerVersion="500"
     Scope="perUser"

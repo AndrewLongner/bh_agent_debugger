@@ -6,7 +6,7 @@
 // fails the release when they differ.
 namespace bh_agent_version
 {
-static const char version[] = "1.0.1";
+static const char version[] = "1.0.2";
 // Comma-separated capability flags. Additive only; never rename a shipped flag.
 static const char features[] = "profile_output,profile_analyze_function,profile_analyze_filters,profile_analyze_subtree_scope,profile_analyze_sections,doctor_versions,mcp_stdio";
 }

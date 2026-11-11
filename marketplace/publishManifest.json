@@ -4,7 +4,7 @@
   "identity": {
     "internalName": "BHAgentDebugger",
     "displayName": "BH Agent Debugger",
-    "description": "Lets AI coding agents drive the Visual Studio debugger for native C and C++: breakpoints, stepping, threads, memory, locals, expressions, crash dumps and CPU profiling, through a CLI, an MCP server an",
+    "description": "Lets AI coding agents drive the Visual Studio debugger for native C and C++: breakpoints, stepping, memory, locals, crash dumps and CPU profiling, through a CLI and an MCP server.",
     "icon": "bh_agent_debugger_icon.png",
     "installTargets": [
       { "sku": "Microsoft.VisualStudio.Community", "version": "[17.0,19.0)" },
