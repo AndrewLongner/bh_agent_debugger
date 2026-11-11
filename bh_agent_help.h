@@ -36,7 +36,7 @@ namespace bh_agent_help
             {"stack", "stack [value]", "Context-sensitive legacy alias: live sessions treat value as raw stack bytes (like read stack); dump sessions treat value as symbolic frame count (like where). Prefer where for symbolic call stacks and read stack for bytes."},
             {"read mem|memory", "read mem <address> <bytes> [hex|ascii|u32|u64|ptr]", "Reads process or captured dump memory. Size must be positive; maximum returned is 256 bytes live or 4096 bytes in a dump. Typed sizes must align to their element width."},
             {"step|step into|step over|step out", "step into / step over / step out", "Executes the selected source-level step from break mode and waits for a stable new break."},
-            {"continue", "continue", "Continues from break mode; it is a safe no-op when already running or not in break mode."},
+            {"continue", "continue", "Continues from break mode and returns once Visual Studio reports run mode, so a following break works; it is a safe no-op when already running or not in break mode."},
             {"start|start debugging", "start debugging / start", "Starts debugging through Visual Studio DTE."},
             {"break|async break", "async break / break", "Requests Break All while running; it is a safe no-op when already broken."},
             {"stop|stop debugging", "stop debugging / stop", "Stops the active Visual Studio debugging session."},

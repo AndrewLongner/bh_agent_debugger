@@ -139,6 +139,9 @@ public:
 
     STDMETHOD(OnModeChange)(DBGMODE dbgmodeNew) override
     {
+        // Publish the mode before bumping a generation: a reader that sees the new
+        // generation must also see the new mode.
+        m_vs_event_mode.store(static_cast<int>(dbgmodeNew));
         if (dbgmodeNew == DBGMODE_Run)
         {
             const unsigned long long generation = m_vs_run_generation.fetch_add(1) + 1;
@@ -367,6 +370,88 @@ private:
         response = saw_run_transition
             ? "error: step stabilization timeout waiting for stable break state"
             : "error: step stabilization timeout waiting for debugger to leave break state";
+        return false;
+    }
+
+    // Waits until the IVsDebuggerEvents run event arrives after a continue. DTE reports
+    // run mode as soon as Debug.Start is accepted, but VS only accepts Debug.BreakAll
+    // once this event has fired (0.4-1.0 s later).
+    bool WaitForVsRunReadiness(
+        unsigned long long initial_run_generation,
+        unsigned long long initial_break_generation,
+        unsigned long long initial_design_generation,
+        std::string& state,
+        std::string& response)
+    {
+        const DWORD timeout_ms = 10000;
+        const DWORD poll_interval_ms = 25;
+        const ULONGLONG start_tick = GetTickCount64();
+
+        while ((GetTickCount64() - start_tick) <= timeout_ms)
+        {
+            if (m_is_stopping.load())
+            {
+                response = "error: package stopping while waiting for run mode";
+                return false;
+            }
+            if (!m_debugger_events_ready.load())
+            {
+                response = "error: debugger mode events became unavailable while waiting for run mode";
+                return false;
+            }
+
+            const unsigned long long run_generation = m_vs_run_generation.load();
+            const unsigned long long break_generation = m_vs_break_generation.load();
+            const unsigned long long design_generation = m_vs_design_generation.load();
+            if (run_generation > initial_run_generation || design_generation > initial_design_generation)
+            {
+                if (design_generation > initial_design_generation)
+                {
+                    state = "debugging ended";
+                }
+                else if (break_generation > initial_break_generation)
+                {
+                    state = "break hit";
+                }
+                else
+                {
+                    state = "running";
+                }
+
+                bh_agent_logf(
+                    "package.pipe",
+                    "continue reached %s runGeneration=%llu->%llu elapsedMs=%llu",
+                    state.c_str(),
+                    initial_run_generation,
+                    run_generation,
+                    (unsigned long long)(GetTickCount64() - start_tick));
+                return true;
+            }
+
+            if (m_pipe_stop_event)
+            {
+                if (WaitForSingleObject(m_pipe_stop_event, poll_interval_ms) == WAIT_OBJECT_0)
+                {
+                    response = "error: package stopping while waiting for run mode";
+                    return false;
+                }
+            }
+            else
+            {
+                Sleep(poll_interval_ms);
+            }
+        }
+
+        bh_agent_logf(
+            "package.pipe",
+            "continue run-mode timeout runGeneration=%llu->%llu breakGeneration=%llu->%llu designGeneration=%llu->%llu",
+            initial_run_generation,
+            m_vs_run_generation.load(),
+            initial_break_generation,
+            m_vs_break_generation.load(),
+            initial_design_generation,
+            m_vs_design_generation.load());
+        response = "error: continue timeout waiting for VS run mode";
         return false;
     }
 
@@ -1853,6 +1938,27 @@ private:
 
             if (mode == dbgRunMode)
             {
+                // A previous continue may still be in flight: DTE already says run, but
+                // the run event has not arrived. Load generations before the event mode
+                // (OnModeChange publishes in the reverse order).
+                const unsigned long long pending_run_generation = m_vs_run_generation.load();
+                const unsigned long long pending_break_generation = m_vs_break_generation.load();
+                const unsigned long long pending_design_generation = m_vs_design_generation.load();
+                if (m_debugger_events_ready.load() && m_vs_event_mode.load() != DBGMODE_Run)
+                {
+                    std::string state;
+                    if (!WaitForVsRunReadiness(
+                            pending_run_generation,
+                            pending_break_generation,
+                            pending_design_generation,
+                            state,
+                            response))
+                    {
+                        bh_agent_logf("package.pipe", "pending continue did not reach run mode: %s", response.c_str());
+                        return true;
+                    }
+                }
+
                 bh_agent_logf("package.pipe", "continue ignored: debugger already running");
                 response = "ok: already running";
                 return true;
@@ -1943,6 +2049,13 @@ private:
             initial_design_generation = m_vs_design_generation.load();
         }
 
+        if (is_continue_command)
+        {
+            initial_run_generation = m_vs_run_generation.load();
+            initial_break_generation = m_vs_break_generation.load();
+            initial_design_generation = m_vs_design_generation.load();
+        }
+
         hr = dte->ExecuteCommand(CComBSTR(command_name), CComBSTR(L""));
         if (FAILED(hr))
         {
@@ -1998,6 +2111,30 @@ private:
                 response))
         {
             bh_agent_logf("package.pipe", "VS break command '%s' did not stabilize: %s", message, response.c_str());
+            return true;
+        }
+        if (is_continue_command)
+        {
+            if (!m_debugger_events_ready.load())
+            {
+                bh_agent_logf("package.pipe", "continue run-mode wait skipped: debugger mode events unavailable");
+                response = "ok: executed continue";
+                return true;
+            }
+
+            std::string state;
+            if (!WaitForVsRunReadiness(
+                    initial_run_generation,
+                    initial_break_generation,
+                    initial_design_generation,
+                    state,
+                    response))
+            {
+                bh_agent_logf("package.pipe", "VS continue did not reach run mode: %s", response.c_str());
+                return true;
+            }
+
+            response = "ok: executed continue | " + state;
             return true;
         }
 
@@ -3557,6 +3694,7 @@ private:
     std::atomic<unsigned long long> m_vs_run_generation{ 0 };
     std::atomic<unsigned long long> m_vs_break_generation{ 0 };
     std::atomic<unsigned long long> m_vs_design_generation{ 0 };
+    std::atomic<int> m_vs_event_mode{ -1 };
     bh_eval::ui_dispatcher m_eval_dispatcher;
     HANDLE m_pipe_thread = nullptr;
     HANDLE m_pipe_stop_event = nullptr;
