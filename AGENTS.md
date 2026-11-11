@@ -132,6 +132,7 @@ When the user explicitly requests an MSI release/update/install:
    - Installed CLI, service, VSIX, OpenCode tool, and skill (including the Claude Code and Codex copies when those hosts are present) are non-empty and SHA-256-identical to repository/build sources; `claude mcp get bh_agent_debugger` and `codex mcp get bh_agent_debugger` show the installed CLI.
    - The normal Visual Studio profile has the expected VSIX version and package plus x64/x86 engine DLLs matching the build outputs.
    - When runtime validation was requested, use the normal debugger-tool workflow and perform only non-destructive command checks.
+8. Only when the user asks for a Visual Studio Marketplace update: after the GitHub release `v<version>` carries the same MSI, run `installer\publish_marketplace.ps1 -DryRun`, then the same command without `-DryRun`. It publishes the MSI with `marketplace\publishManifest.json` (the script fills in the version) and `marketplace\overview.md`, then checks that the public download matches the MSI. It uses the publisher credentials saved by `VsixPublisher.exe login`; never pass or print a token.
 
 Report MSI, VSIX, or debugger-agent errors immediately. Never reboot automatically.
 ## Test / Lint Status

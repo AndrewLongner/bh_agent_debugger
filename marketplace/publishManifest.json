@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json.schemastore.org/vsix-publish",
+  "categories": [ "coding", "performance", "other" ],
+  "identity": {
+    "internalName": "BHAgentDebugger",
+    "displayName": "BH Agent Debugger",
+    "description": "Lets AI coding agents drive the Visual Studio debugger for native C and C++: breakpoints, stepping, threads, memory, locals, expressions, crash dumps and CPU profiling, through a CLI, an MCP server an",
+    "icon": "bh_agent_debugger_icon.png",
+    "installTargets": [
+      { "sku": "Microsoft.VisualStudio.Community", "version": "[17.0,19.0)" },
+      { "sku": "Microsoft.VisualStudio.Pro", "version": "[17.0,19.0)" },
+      { "sku": "Microsoft.VisualStudio.Enterprise", "version": "[17.0,19.0)" }
+    ],
+    "language": "en-US",
+    "tags": [ "agent", "ai", "c++", "crash dump", "debugger", "mcp", "profiling" ],
+    "vsixId": "boiling-lava-hot-agent-debugger.6A7FD49D-C71A-45AB-A816-8F279F2583E2"
+  },
+  "overview": "overview.md",
+  "priceCategory": "free",
+  "publisher": "BoilingLavaHotLLC",
+  "private": false,
+  "qna": true,
+  "repo": "https://github.com/AndrewLongner/bh_agent_debugger"
+}
