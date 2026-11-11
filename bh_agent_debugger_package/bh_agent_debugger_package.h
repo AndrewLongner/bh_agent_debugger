@@ -375,7 +375,9 @@ private:
 
     // Waits until the IVsDebuggerEvents run event arrives after a continue. DTE reports
     // run mode as soon as Debug.Start is accepted, but VS only accepts Debug.BreakAll
-    // once this event has fired (0.4-1.0 s later).
+    // once this event has fired (0.4-1.0 s later). A breakpoint hit within ~100 ms of the
+    // continue produces only a break event and no run event, so a new break or design
+    // event also ends the wait.
     bool WaitForVsRunReadiness(
         unsigned long long initial_run_generation,
         unsigned long long initial_break_generation,
@@ -403,7 +405,9 @@ private:
             const unsigned long long run_generation = m_vs_run_generation.load();
             const unsigned long long break_generation = m_vs_break_generation.load();
             const unsigned long long design_generation = m_vs_design_generation.load();
-            if (run_generation > initial_run_generation || design_generation > initial_design_generation)
+            if (run_generation > initial_run_generation ||
+                break_generation > initial_break_generation ||
+                design_generation > initial_design_generation)
             {
                 if (design_generation > initial_design_generation)
                 {
@@ -2134,7 +2138,24 @@ private:
                 return true;
             }
 
+            if (state == "break hit" &&
+                !WaitForVsBreakReadiness(
+                    debugger,
+                    initial_run_generation,
+                    initial_break_generation,
+                    initial_design_generation,
+                    true,
+                    response))
+            {
+                bh_agent_logf("package.pipe", "VS continue break hit did not stabilize: %s", response.c_str());
+                return true;
+            }
+
             response = "ok: executed continue | " + state;
+            if (state == "break hit")
+            {
+                response += " | stable break";
+            }
             return true;
         }
 

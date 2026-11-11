@@ -104,8 +104,8 @@ Starting:
 - `async break` and `break` are aliases. In break mode they return `ok: already break`; in run mode they
   break, and `status` then shows `reason=async_break`.
 - `continue` in break mode continues and returns once Visual Studio reports run mode, so a `break`
-  right after it works. Success is `ok: executed continue | running`, `| break hit` (it stopped again
-  during the wait) or `| debugging ended`. In run mode it is a no-op (`ok: already running`), and outside
+  right after it works. Success is `ok: executed continue | running`, `| break hit | stable break` (it
+  stopped again during the wait, for example at a breakpoint hit at once) or `| debugging ended`. In run mode it is a no-op (`ok: already running`), and outside
   run and break mode too (`ok: not in break mode`).
 - `step into`, `step over` and `step out` wait for the debugger to leave break mode and settle in a new
   break. Success is `ok: executed step <kind> | stable break`. Use `timeoutMs` of 15000 or more: the
