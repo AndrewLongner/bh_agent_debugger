@@ -16,11 +16,13 @@ Publishes the release MSI to the Visual Studio Marketplace listing BoilingLavaHo
 
 -DryRun runs steps 1-4 without publishing.
 
-Authentication: by default VsixPublisher uses the publisher credentials saved on this PC. Save them
-once, in your own terminal, with
+Authentication: releases are published by .github\workflows\publish-marketplace.yml, which runs this
+script with -Oidc (trusted publishing from GitHub Actions; needs a VsixPublisher that supports -oidc,
+see installer\get_vsixpublisher.ps1). Without -Oidc, VsixPublisher uses the publisher credentials
+saved on this PC by
   VsixPublisher.exe login -publisherName BoilingLavaHotLLC -personalAccessToken <PAT>
-This script never takes or prints a token. -Oidc uses trusted publishing from GitHub Actions instead
-and needs a VsixPublisher that supports -oidc.
+This script never takes or prints a token. The GitHub release check sends $env:GITHUB_TOKEN when it
+is set (GitHub Actions) to avoid the anonymous API rate limit.
 
 Exit codes: 0 published and verified (or already published), 1 error, 2 uploaded but the public
 Marketplace did not serve the new version within -VerifyTimeoutSeconds.
@@ -228,7 +230,12 @@ else
     $releaseUri = "https://api.github.com/repos/$githubRepo/releases/tags/v$version"
     try
     {
-        $release = Invoke-RestMethod -Uri $releaseUri -Headers @{ 'User-Agent' = 'bh_agent_debugger-publish'; Accept = 'application/vnd.github+json' }
+        $githubHeaders = @{ 'User-Agent' = 'bh_agent_debugger-publish'; Accept = 'application/vnd.github+json' }
+        if ($env:GITHUB_TOKEN)
+        {
+            $githubHeaders.Authorization = "Bearer $env:GITHUB_TOKEN"
+        }
+        $release = Invoke-RestMethod -Uri $releaseUri -Headers $githubHeaders
     }
     catch
     {
