@@ -53,6 +53,7 @@ Useful when a user runs older installed binaries (`doctor` shows the versions):
 | 0.13.2 | A failed broker reply (`"ok": false`) is a tool error carrying its message; a closed Visual Studio leaves the target list at once |
 | 0.13.3 | The MSI installs the skill into Codex on Windows and in WSL and registers the MCP server |
 | 1.0.0 | First public release; the MSI skips the Windows Codex MCP registration when `codex --version` fails |
+| 1.0.1 | `continue` returns once Visual Studio reports run mode, so a `break` right after it works |
 
 ## Profiling internals
 

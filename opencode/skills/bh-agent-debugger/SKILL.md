@@ -5,7 +5,7 @@ description: Drive the Visual Studio 2022/2026 debugger with BH Agent Debugger (
 
 # BH Agent Debugger
 
-This skill matches BH Agent Debugger **1.0.0**. BH Agent Debugger lets an agent drive Visual Studio 2022
+This skill matches BH Agent Debugger **1.0.1**. BH Agent Debugger lets an agent drive Visual Studio 2022
 (17.x) or 2026 (18.x) instances that have the BH Agent Debugger extension, through a local broker
 service.
 
@@ -103,7 +103,9 @@ Starting:
 
 - `async break` and `break` are aliases. In break mode they return `ok: already break`; in run mode they
   break, and `status` then shows `reason=async_break`.
-- `continue` in break mode continues. In run mode it is a no-op (`ok: already running`), and outside
+- `continue` in break mode continues and returns once Visual Studio reports run mode, so a `break`
+  right after it works. Success is `ok: executed continue | running`, `| break hit` (it stopped again
+  during the wait) or `| debugging ended`. In run mode it is a no-op (`ok: already running`), and outside
   run and break mode too (`ok: not in break mode`).
 - `step into`, `step over` and `step out` wait for the debugger to leave break mode and settle in a new
   break. Success is `ok: executed step <kind> | stable break`. Use `timeoutMs` of 15000 or more: the
