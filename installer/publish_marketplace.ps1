@@ -17,9 +17,11 @@ Publishes the release MSI to the Visual Studio Marketplace listing BoilingLavaHo
 -DryRun runs steps 1-4 without publishing.
 
 Authentication: releases are published by .github\workflows\publish-marketplace.yml, which runs this
-script with -Oidc (trusted publishing from GitHub Actions; needs a VsixPublisher that supports -oidc,
-see installer\get_vsixpublisher.ps1). Without -Oidc, VsixPublisher uses the publisher credentials
-saved on this PC by
+script with -Oidc (trusted publishing from GitHub Actions). VsixPublisher's own -oidc exchange omits
+the api-version (VsixPub0047, microsoft/vsmarketplace#2310, still in Microsoft.VSSDK.BuildTools
+18.12.1606), so -Oidc exchanges the job's GitHub OIDC token for a short-lived Marketplace credential
+itself and passes that to VsixPublisher; the credential is masked in the log and never stored.
+Without -Oidc, VsixPublisher uses the publisher credentials saved on this PC by
   VsixPublisher.exe login -publisherName BoilingLavaHotLLC -personalAccessToken <PAT>
 This script never takes or prints a token. The GitHub release check sends $env:GITHUB_TOKEN when it
 is set (GitHub Actions) to avoid the anonymous API rate limit.
@@ -51,6 +53,7 @@ $msiAssetName = 'bh_agent_debugger.msi'
 $galleryQueryUri = 'https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery'
 $marketplaceDir = Join-Path $repoRoot 'marketplace'
 $stageRoot = Join-Path $repoRoot 'Temp\marketplace_publish'
+$tokenExchangeUri = 'https://marketplace.visualstudio.com/_apis/gallery/token?api-version=7.2-preview.1'
 
 function Get-Sha256([string]$Path)
 {
@@ -129,6 +132,49 @@ function Get-LiveMarketplaceSha256([string]$Version, [string]$OutDir)
     $hash = Get-Sha256 $out
     Remove-Item -LiteralPath $out -Force
     return $hash
+}
+
+function Get-MarketplaceOidcCredential
+{
+    # Trusted publishing exchange: GitHub OIDC token (audience marketplace.visualstudio.com) for a
+    # Marketplace credential valid for about 15 minutes. Needs job permission id-token: write.
+    if (-not $env:ACTIONS_ID_TOKEN_REQUEST_URL -or -not $env:ACTIONS_ID_TOKEN_REQUEST_TOKEN)
+    {
+        throw '-Oidc needs GitHub Actions with permissions: id-token: write'
+    }
+    $separator = if ($env:ACTIONS_ID_TOKEN_REQUEST_URL.Contains('?')) { '&' } else { '?' }
+    try
+    {
+        $oidc = Invoke-RestMethod -Method Get -Uri "$($env:ACTIONS_ID_TOKEN_REQUEST_URL)$($separator)audience=marketplace.visualstudio.com" `
+            -Headers @{ Authorization = "Bearer $env:ACTIONS_ID_TOKEN_REQUEST_TOKEN"; Accept = 'application/json' }
+    }
+    catch
+    {
+        throw "Could not get the GitHub OIDC token: $($_.Exception.Message)"
+    }
+    if (-not $oidc.value)
+    {
+        throw 'GitHub returned no OIDC token'
+    }
+    Write-Host "::add-mask::$($oidc.value)"
+
+    try
+    {
+        $exchange = Invoke-RestMethod -Method Post -Uri $tokenExchangeUri `
+            -Headers @{ Authorization = "FederatedToken $($oidc.value)"; Accept = 'application/json'; 'X-Market-CI-Provider' = 'github-actions' } `
+            -ContentType 'application/json' -Body (@{ publisherName = $publisherName } | ConvertTo-Json)
+    }
+    catch
+    {
+        $detail = $_.ErrorDetails.Message
+        throw "Marketplace trusted publishing exchange failed: $($_.Exception.Message) $detail (check the Trusted Publishing policy of ${publisherName}: owner, repository, workflow file and environment)"
+    }
+    if (-not $exchange.credential)
+    {
+        throw 'The Marketplace trusted publishing exchange returned no credential'
+    }
+    Write-Host "::add-mask::$($exchange.credential)"
+    return $exchange.credential
 }
 
 function Test-VsixPublisherOidc([string]$Path)
@@ -309,14 +355,15 @@ $manifestPath = Join-Path $stageDir 'publishManifest.json'
 [IO.File]::WriteAllText($manifestPath, ($manifest | ConvertTo-Json -Depth 8), (New-Object Text.UTF8Encoding $false))
 Write-Output "Staged:      $stageDir"
 
-$publisherExe = Find-VsixPublisher $Oidc.IsPresent
+$publisherExe = Find-VsixPublisher $false
 $publishArgs = @('publish', '-payload', $MsiPath, '-publishManifest', $manifestPath)
+$shownArgs = $publishArgs
 if ($Oidc)
 {
-    $publishArgs += '-oidc'
+    $shownArgs = $publishArgs + @('-personalAccessToken', '<trusted publishing credential>')
 }
 Write-Output "Publisher:   $publisherExe"
-Write-Output ("Command:     VsixPublisher.exe " + ($publishArgs -join ' '))
+Write-Output ("Command:     VsixPublisher.exe " + ($shownArgs -join ' '))
 
 if ($DryRun)
 {
@@ -325,6 +372,11 @@ if ($DryRun)
 }
 
 # 5. Publish and verify
+if ($Oidc)
+{
+    $publishArgs += @('-personalAccessToken', (Get-MarketplaceOidcCredential))
+    Write-Output 'Trusted publishing: exchanged the GitHub OIDC token for a Marketplace credential'
+}
 & $publisherExe @publishArgs
 if ($LASTEXITCODE -ne 0)
 {
